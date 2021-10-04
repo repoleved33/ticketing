@@ -1,0 +1,64 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+driver = webdriver.Chrome('./chromedriver')
+
+driver.set_window_size(1400, 1000)  # (가로, 세로)
+driver.get('https://ticket.interpark.com/Gate/TPLogin.asp') # 페이지 이동
+
+
+driver.switch_to.frame(driver.find_element(By.XPATH, "//div[@class='leftLoginBox']/iframe[@title='login']"))
+userId = driver.find_element(By.ID, 'userId')
+userId.send_keys('gyu0025') # 로그인 할 계정 id
+userPwd = driver.find_element(By.ID, 'userPwd')
+userPwd.send_keys('Rbrb389516!!') # 로그인 할 계정의 패스워드
+userPwd.send_keys('\ue007')
+
+
+driver.get('https://tickets.interpark.com/goods/21006800')
+
+# 혹시 예매안내가 있는지 체크 후 있으면 닫기 버튼 클릭
+#close_check = check_exists_by_element(By.CLASS_NAME, "prdGuide")
+
+#if close_check:
+#	driver.find_element(By.CLASS_NAME, "is-bottomBtn").click()
+
+calen = driver.find_elements(By.CSS_SELECTOR, ".datepicker-panel")
+
+uls = calen[0].find_elements(By.TAG_NAME, "ul")
+year_month = uls[0].find_elements(By.TAG_NAME, "li")[1].text.split('. ')
+year = year_month[0]  # 년
+month = year_month[1]  # 월
+
+prev = uls[0].find_elements(By.TAG_NAME, "li")[0]
+next = uls[0].find_elements(By.TAG_NAME, "li")[2]
+
+
+next.click()
+
+
+
+a = driver.find_element(By.CLASS_NAME, "is-primary")
+a.click()
+
+
+# 선택 가능한 날짜 모두 불러오기
+CellPlayDate = driver.find_elements(By.XPATH, "//ul[@data-view='days']/li[@class!='disabled']")
+
+# 일 선택
+for cell in CellPlayDate:
+    if cell.text == '5':	# wantDate : 예매 원하는 일
+        cell.click()
+        break
+
+# 예매하기
+a = driver.find_element(By.CLASS_NAME, "is-primary")
+a.click()
+
+
+# 열린 탭으로 전환
+driver.switch_to.window(driver.window_handles[-1])
